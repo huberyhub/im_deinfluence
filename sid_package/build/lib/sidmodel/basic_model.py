@@ -108,27 +108,3 @@ class InfluenceDeinfluenceModel:
         plt.tight_layout()
         plt.show()
 
-
-def generate_and_run_model(graph_type, num_nodes, steps, edge_prob=None, k=None, p=None, m=None):
-    if graph_type == 'erdos_renyi':
-        graph = nx.erdos_renyi_graph(num_nodes, edge_prob, directed=True)
-    elif graph_type == 'watts_strogatz':
-        graph = nx.watts_strogatz_graph(num_nodes, k, p).to_directed()
-    elif graph_type == 'barabasi_albert':
-        graph = nx.barabasi_albert_graph(num_nodes, m).to_directed()
-    else:
-        raise ValueError("Unsupported graph type. Choose from 'erdos_renyi', 'watts_strogatz', or 'barabasi_albert'.")
-
-    model = InfluenceDeinfluenceModel(graph)
-    model.set_initial_states()
-    model.set_influencers([0, 1,3])
-    model.set_deinfluencers([2])
-    model.run_cascade(steps)
-
-    return model
-
-def display_model_graphs(model):
-    # for step in range(len(model.get_history())):
-    #     model.display_graph(step)
-    model.display_graphs_grid()
-
