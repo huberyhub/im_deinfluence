@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: sid_package
+Version: 0.1
+Summary: A package for simulating influence and deinfluence in networks
+Author: Hubery Hu
+Author-email: hubery.jiarui@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: networkx
+Requires-Dist: matplotlib
+
+# Influence-Deinfluence Model
+
+A Python package for simulating influence and deinfluence in networks using different network models.
+
+## Installation
+
+Go to sid_package dir and use pip install .

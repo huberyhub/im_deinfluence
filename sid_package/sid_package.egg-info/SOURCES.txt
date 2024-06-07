@@ -1,0 +1,11 @@
+README.md
+setup.py
+sid_package.egg-info/PKG-INFO
+sid_package.egg-info/SOURCES.txt
+sid_package.egg-info/dependency_links.txt
+sid_package.egg-info/requires.txt
+sid_package.egg-info/top_level.txt
+sidmodel/__init__.py
+sidmodel/basic_model.py
+sidmodel/greedy_influencer_model.py
+tests/test_model.py
