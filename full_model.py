@@ -10,6 +10,7 @@ class InfluenceDeinfluenceModel:
         self.set_initial_states()
         self.history = []  # To store the history of node states
         self.activated_edges = set()
+        self.selected_influencers = set()
 
     def edge_weights(self, type):
         if type == 'random':
@@ -213,9 +214,8 @@ class InfluenceDeinfluenceModel:
             if best_candidate is not None:
                 best_influencers.add(best_candidate)
 
+        self.selected_influencers = best_influencers
         return best_influencers
-    
-    # New Greedy Algorithm
     
     def generate_random_graph(self, p):
         random_graph = nx.DiGraph()
@@ -295,3 +295,48 @@ class InfluenceDeinfluenceModel:
         """Select k random deinfluencers."""
         population = sorted(self.graph.nodes)
         return random.sample(population, k)
+    
+    def greedy_hill_climbing_deinf(self, j, steps, R=10):
+        """Select j de-influencers using greedy algorithm."""
+        optimized_deinfluencer = set()
+        self.reset_graph()
+
+        for _ in range(j):
+            best_candidate = None
+            best_score = -1
+
+            for node in self.graph.nodes:
+                if node in optimized_deinfluencer:
+                    continue
+                
+                # Temporarily add the candidate node to the set of influencers
+                current_deinfluencers = optimized_deinfluencer | {node}
+                total_score = 0
+
+                for _ in range(R):
+                    self.activated_edges.clear()  # Reset activated edges
+                    self.set_initial_states()
+                    self.set_influencers(current_deinfluencers)
+                    self.run_cascade_influencer(steps)
+                    total_score += self.evaluate_influence()
+
+                avg_score = total_score / R
+
+                if avg_score > best_score:
+                    best_score = avg_score
+                    best_candidate = node
+
+            if best_candidate is not None:
+                optimized_deinfluencer.add(best_candidate)
+            self.reset_graph()
+
+        return optimized_deinfluencer
+    
+    def select_deinfluencers_from_influencers(self, j):
+        influencers = list(self.selected_influencers)  # Convert set to list
+        deinfluencers = random.sample(influencers, j)  # Select j deinfluencers randomly from the selected influencers
+        return deinfluencers
+    
+    def select_deinfluencers_from_influencers_degree_centrality(self, j):
+        influencers = list(self.selected_influencers)
+        return sorted(influencers, key=lambda node: self.graph.degree(node), reverse=True)[:j]
