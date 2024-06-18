@@ -3,20 +3,22 @@ import networkx as nx
 import random
 
 class InfluenceDeinfluenceModel:
-    def __init__(self, graph, edge_weights_type='random'):
+    def __init__(self, graph, edge_weights_type='random', c=1):
         self.graph = graph
-        self.edge_weights(edge_weights_type)
+        self.edge_weights(edge_weights_type, c)
         self.set_initial_states()
         self.activated_edges = set()
         self.selected_influencers = set()
+        self.selected_deinfluencers = set()
+        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}  # Trackers for transitions
 
-    def edge_weights(self, type):
+    def edge_weights(self, type, c):
         if type == 'random':
             self.random_edge_weights()
         elif type == 'fixed':
             self.fixed_edge_weights(p_is=1, p_ds=1, p_di=1)
         elif type == 'dominate':
-            self.dominate_edge_weights(c=1)
+            self.dominate_edge_weights(c)
         else:
             print("Invalid edge weights type. Using random edge weights.")
             self.random_edge_weights()
@@ -79,11 +81,14 @@ class InfluenceDeinfluenceModel:
             node, neighbor = edge
             if self.graph.nodes[node]['state'] == 'I' and self.graph.nodes[neighbor]['state'] == 'S':
                 new_influenced.add(neighbor)
+                self.transition_counts['I->S'] += 1
             elif self.graph.nodes[node]['state'] == 'D':
                 if self.graph.nodes[neighbor]['state'] == 'S':
                     new_deinfluenced.add(neighbor)
+                    self.transition_counts['D->S'] += 1
                 elif self.graph.nodes[neighbor]['state'] == 'I':
                     new_deinfluenced.add(neighbor)
+                    self.transition_counts['D->I'] += 1
 
         for node in new_influenced:
             self.graph.nodes[node]['state'] = 'I'
@@ -113,6 +118,9 @@ class InfluenceDeinfluenceModel:
     def evaluate_influence(self):
         """Evaluate the number of influenced nodes."""
         return sum(1 for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'I')
+    
+    def evaluate_deinfluence(self):
+        return sum(1 for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'D')
         
     def greedy_hill_climbing(self, k, steps, R=10):
         # Select k initial influencers using the improved greedy algorithm.
@@ -144,6 +152,12 @@ class InfluenceDeinfluenceModel:
         self.selected_influencers = best_influencers
 
         return best_influencers
+    
+    def random_influencers(self, k):
+        return set(random.sample(list(self.graph.nodes), k))
+    
+    def random_deinfluencers(self, k):
+        return set(random.sample(list(self.graph.nodes), k))
 
     def reset_graph(self):
         self.set_initial_states()

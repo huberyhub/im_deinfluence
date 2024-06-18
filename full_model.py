@@ -11,6 +11,7 @@ class InfluenceDeinfluenceModel:
         self.history = []  # To store the history of node states
         self.activated_edges = set()
         self.selected_influencers = set()
+        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}  # Trackers for transitions
 
     def edge_weights(self, type):
         if type == 'random':
@@ -74,6 +75,7 @@ class InfluenceDeinfluenceModel:
                         random.random() < self.graph[node][neighbor]['p_is']):
                         new_influenced.add(neighbor)
                         self.activated_edges.add(edge)
+                        self.transition_counts['I->S'] += 1
             elif self.graph.nodes[node]['state'] == 'D':
                 for neighbor in self.graph.neighbors(node):
                     edge = (node, neighbor)
@@ -82,10 +84,12 @@ class InfluenceDeinfluenceModel:
                             random.random() < self.graph[node][neighbor]['p_ds']):
                             new_deinfluenced.add(neighbor)
                             self.activated_edges.add(edge)
+                            self.transition_counts['D->S'] += 1
                         elif (self.graph.nodes[neighbor]['state'] == 'I' and 
                               random.random() < self.graph[node][neighbor]['p_di']):
                             new_deinfluenced.add(neighbor)
                             self.activated_edges.add(edge)
+                            self.transition_counts['D->I'] += 1
 
         for node in new_influenced:
             self.graph.nodes[node]['state'] = 'I'
@@ -121,6 +125,7 @@ class InfluenceDeinfluenceModel:
 
     def run_cascade(self, steps):
         self.store_history()  # Store the initial state
+        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}  # Reset transition counts  
         for _ in range(steps):
             self.spread_influence()
 

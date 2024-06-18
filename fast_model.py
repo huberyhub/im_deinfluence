@@ -95,8 +95,7 @@ class InfluenceDeinfluenceModel:
         for node in self.graph.nodes:
             if self.graph.nodes[node]['state'] == 'I':
                 for neighbor in self.graph.neighbors(node):
-                    if (self.graph.nodes[neighbor]['state'] == 'S' and 
-                        random.random() < self.graph[node][neighbor]['p_is']):
+                    if (self.graph.nodes[neighbor]['state'] == 'S' and random.random() < self.graph[node][neighbor]['p_is']):
                         self.active_edges.add((node, neighbor))
             elif self.graph.nodes[node]['state'] == 'D':
                 for neighbor in self.graph.neighbors(node):
