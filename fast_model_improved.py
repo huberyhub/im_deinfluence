@@ -121,6 +121,9 @@ class InfluenceDeinfluenceModel:
     
     def evaluate_deinfluence(self):
         return sum(1 for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'D')
+    
+    def evaluate_susceptible(self):
+        return sum(1 for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'S')
         
     def greedy_hill_climbing(self, k, steps, R=10):
         # Select k initial influencers using the improved greedy algorithm.
@@ -162,3 +165,83 @@ class InfluenceDeinfluenceModel:
     def reset_graph(self):
         self.set_initial_states()
         self.activated_edges = set()
+
+    def select_deinfluencers_degree_centrality(self, k):
+        """Select k deinfluencers based on degree centrality."""
+        centrality = nx.degree_centrality(self.graph)
+        return sorted(centrality, key=centrality.get, reverse=True)[:k]
+
+    def select_deinfluencers_closeness_centrality(self, k):
+        """Select k deinfluencers based on closeness centrality."""
+        centrality = nx.closeness_centrality(self.graph)
+        return sorted(centrality, key=centrality.get, reverse=True)[:k]
+
+    def select_deinfluencers_betweenness_centrality(self, k):
+        """Select k deinfluencers based on betweenness centrality."""
+        centrality = nx.betweenness_centrality(self.graph)
+        return sorted(centrality, key=centrality.get, reverse=True)[:k]
+
+    def select_deinfluencers_eigenvector_centrality(self, k, max_iter=1000, tol=1e-06):
+        """Select k deinfluencers based on eigenvector centrality."""
+        try:
+            centrality = nx.eigenvector_centrality(self.graph, max_iter=max_iter, tol=tol)
+        except nx.PowerIterationFailedConvergence:
+            print(f"Power iteration failed to converge within {max_iter} iterations")
+            return []
+        
+        return sorted(centrality, key=centrality.get, reverse=True)[:k]
+
+    def select_deinfluencers_pagerank_centrality(self, k):
+        """Select k deinfluencers based on pagerank centrality."""
+        centrality = nx.pagerank(self.graph)
+        return sorted(centrality, key=centrality.get, reverse=True)[:k]
+    
+    def select_deinfluencers_random(self, k):
+        """Select k random deinfluencers."""
+        population = sorted(self.graph.nodes)
+        return random.sample(population, k)
+    
+    def greedy_hill_climbing_deinf(self, j, steps, R=10):
+        """Select j de-influencers using greedy algorithm."""
+        optimized_deinfluencer = set()
+        self.reset_graph()
+
+        for _ in range(j):
+            best_candidate = None
+            best_score = -1
+
+            for node in self.graph.nodes:
+                if node in optimized_deinfluencer:
+                    continue
+                
+                # Temporarily add the candidate node to the set of influencers
+                current_deinfluencers = optimized_deinfluencer | {node}
+                total_score = 0
+
+                for _ in range(R):
+                    self.activated_edges.clear()  # Reset activated edges
+                    self.set_initial_states()
+                    self.set_influencers(current_deinfluencers)
+                    self.run_cascade_influencer(steps)
+                    total_score += self.evaluate_influence()
+
+                avg_score = total_score / R
+
+                if avg_score > best_score:
+                    best_score = avg_score
+                    best_candidate = node
+
+            if best_candidate is not None:
+                optimized_deinfluencer.add(best_candidate)
+            self.reset_graph()
+
+        return optimized_deinfluencer
+    
+    def select_deinfluencers_from_influencers(self, j):
+        influencers = list(self.selected_influencers)  # Convert set to list
+        deinfluencers = random.sample(influencers, j)  # Select j deinfluencers randomly from the selected influencers
+        return deinfluencers
+    
+    def select_deinfluencers_from_influencers_degree_centrality(self, j):
+        influencers = list(self.selected_influencers)
+        return sorted(influencers, key=lambda node: self.graph.degree(node), reverse=True)[:j]
