@@ -22,6 +22,9 @@ class InfluenceDeinfluenceModel:
         else:
             print("Invalid edge weights type. Using random edge weights.")
             self.random_edge_weights()
+    
+    def reset_transition_counts(self):
+        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}
 
     def random_edge_weights(self):
         for u, v in self.graph.edges:
@@ -106,11 +109,13 @@ class InfluenceDeinfluenceModel:
             self.graph.nodes[node]['state'] = 'I'
 
     def run_cascade(self, steps):
+        #self.pre_determine_active_edges()
         for _ in range(steps):
             self.pre_determine_active_edges()
             self.spread_influence()
 
     def run_cascade_influencer(self, steps):
+        #self.pre_determine_active_edges()
         for _ in range(steps):
             self.pre_determine_active_edges()
             self.influencer_spread_influence()
@@ -237,11 +242,30 @@ class InfluenceDeinfluenceModel:
 
         return optimized_deinfluencer
     
-    def select_deinfluencers_from_influencers(self, j):
+    def select_deinfluencers_from_ini_influencers(self, j):
         influencers = list(self.selected_influencers)  # Convert set to list
         deinfluencers = random.sample(influencers, j)  # Select j deinfluencers randomly from the selected influencers
         return deinfluencers
     
-    def select_deinfluencers_from_influencers_degree_centrality(self, j):
+    def select_deinfluencers_from_ini_influencers_degree_centrality(self, j):
         influencers = list(self.selected_influencers)
         return sorted(influencers, key=lambda node: self.graph.degree(node), reverse=True)[:j]
+    
+    def select_deinfluencers_from_not_ini_influencers(self, j):
+        not_influencers = [node for node in self.graph.nodes if node not in self.selected_influencers]
+        deinfluencers = random.sample(not_influencers, j)
+        return deinfluencers
+
+    def select_deinfluencers_from_influencers(self, j):
+        influencers = [node for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'I']  # Convert set to list
+        deinfluencers = random.sample(influencers, j)  # Select j deinfluencers randomly from the selected influencers
+        return deinfluencers
+    
+    def select_deinfluencers_from_influencers_degree_centrality(self, j):
+        influencers = [node for node in self.graph.nodes if self.graph.nodes[node]['state'] == 'I']
+        return sorted(influencers, key=lambda node: self.graph.degree(node), reverse=True)[:j]
+    
+    def select_deinfluencers_from_not_influencers(self, j):
+        not_influencers = [node for node in self.graph.nodes if self.graph.nodes[node]['state'] != 'I']
+        deinfluencers = random.sample(not_influencers, j)
+        return deinfluencers
