@@ -3,7 +3,7 @@ import networkx as nx
 import random
 
 class InfluenceDeinfluenceModel:
-    def __init__(self, graph, edge_weights_type='random', c=1):
+    def __init__(self, graph, edge_weights_type='random', c=1, p=0.5):
         self.graph = graph
         self.edge_weights(edge_weights_type, c)
         self.set_initial_states()
@@ -11,6 +11,7 @@ class InfluenceDeinfluenceModel:
         self.selected_influencers = set()
         self.selected_deinfluencers = set()
         self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}  # Trackers for transitions
+        self.p = p  # Probability parameter for resolving simultaneous influence
 
     def edge_weights(self, type, c):
         if type == 'random':
@@ -79,25 +80,41 @@ class InfluenceDeinfluenceModel:
     def spread_influence(self):
         new_influenced = set()
         new_deinfluenced = set()
+        simultaneous_influence = set()
 
         for edge in self.active_edges:
             node, neighbor = edge
             if self.graph.nodes[node]['state'] == 'I' and self.graph.nodes[neighbor]['state'] == 'S':
-                new_influenced.add(neighbor)
-                self.transition_counts['I->S'] += 1
+                if neighbor in new_deinfluenced:
+                    simultaneous_influence.add(neighbor)
+                else:
+                    new_influenced.add(neighbor)
+                    self.transition_counts['I->S'] += 1
             elif self.graph.nodes[node]['state'] == 'D':
                 if self.graph.nodes[neighbor]['state'] == 'S':
-                    new_deinfluenced.add(neighbor)
-                    self.transition_counts['D->S'] += 1
+                    if neighbor in new_influenced:
+                        simultaneous_influence.add(neighbor)
+                    else:
+                        new_deinfluenced.add(neighbor)
+                        self.transition_counts['D->S'] += 1
                 elif self.graph.nodes[neighbor]['state'] == 'I':
                     new_deinfluenced.add(neighbor)
                     self.transition_counts['D->I'] += 1
 
         for node in new_influenced:
-            self.graph.nodes[node]['state'] = 'I'
-        for node in new_deinfluenced:
-            self.graph.nodes[node]['state'] = 'D'
+            if node not in simultaneous_influence:
+                self.graph.nodes[node]['state'] = 'I'
 
+        for node in new_deinfluenced:
+            if node not in simultaneous_influence:
+                self.graph.nodes[node]['state'] = 'D'
+
+        for node in simultaneous_influence:
+            # Resolve conflict using parameter p
+            if random.random() < self.p:
+                self.graph.nodes[node]['state'] = 'I'
+            else:
+                self.graph.nodes[node]['state'] = 'D'
     def influencer_spread_influence(self):
         new_influenced = set()
         for edge in self.active_edges:
