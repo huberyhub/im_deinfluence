@@ -10,11 +10,8 @@ class InfluenceDeinfluenceModel:
         self.activated_edges = set()
         self.selected_influencers = set()
         self.selected_deinfluencers = set()
-        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}
-        self.p = p
-        self.attempted_influence = set()  # Track edges that have attempted influence
-        self.attempted_deinfluence = set()  # Track edges that have attempted deinfluence
-
+        self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}  # Trackers for transitions
+        self.p = p  # Probability parameter for resolving simultaneous influence
 
     def edge_weights(self, type, c):
         if type == 'random':
@@ -70,23 +67,15 @@ class InfluenceDeinfluenceModel:
         for node in self.graph.nodes:
             if self.graph.nodes[node]['state'] == 'I':
                 for neighbor in self.graph.neighbors(node):
-                    edge = (node, neighbor)
                     if (self.graph.nodes[neighbor]['state'] == 'S' and 
-                        random.random() < self.graph[node][neighbor]['p_is'] and
-                        edge not in self.attempted_influence):
-                        self.active_edges.add(edge)
-                        self.attempted_influence.add(edge)  # Mark edge as having attempted influence
+                        random.random() < self.graph[node][neighbor]['p_is']):
+                        self.active_edges.add((node, neighbor))
             elif self.graph.nodes[node]['state'] == 'D':
                 for neighbor in self.graph.neighbors(node):
-                    edge = (node, neighbor)
                     if self.graph.nodes[neighbor]['state'] == 'S' and random.random() < self.graph[node][neighbor]['p_ds']:
-                        if edge not in self.attempted_deinfluence:
-                            self.active_edges.add(edge)
-                            self.attempted_deinfluence.add(edge)  # Mark edge as having attempted deinfluence
+                        self.active_edges.add((node, neighbor))
                     elif self.graph.nodes[neighbor]['state'] == 'I' and random.random() < self.graph[node][neighbor]['p_di']:
-                        if edge not in self.attempted_deinfluence:
-                            self.active_edges.add(edge)
-                            self.attempted_deinfluence.add(edge)  # Mark edge as having attempted deinfluence
+                        self.active_edges.add((node, neighbor))
 
     def spread_influence(self):
         new_influenced = set()
@@ -199,8 +188,6 @@ class InfluenceDeinfluenceModel:
     def reset_graph(self):
         self.set_initial_states()
         self.activated_edges = set()
-        self.attempted_influence = set()  # Reset the attempted influence tracker
-        self.attempted_deinfluence = set()  # Reset the attempted deinfluence tracker
 
     def select_deinfluencers_degree_centrality(self, k):
         """Select k deinfluencers based on degree centrality."""
