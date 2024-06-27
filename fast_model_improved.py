@@ -15,7 +15,6 @@ class InfluenceDeinfluenceModel:
         self.attempted_influence = set()  # Track edges that have attempted influence
         self.attempted_deinfluence = set()  # Track edges that have attempted deinfluence
 
-
     def edge_weights(self, type, c):
         if type == 'random':
             self.random_edge_weights()
@@ -142,6 +141,22 @@ class InfluenceDeinfluenceModel:
         for _ in range(steps):
             self.pre_determine_active_edges()
             self.spread_influence()
+    
+    def run_cascade_until_stable(self):
+        while True:
+            previous_attempted_influence = len(self.attempted_influence)
+            previous_attempted_deinfluence = len(self.attempted_deinfluence)
+            
+            self.pre_determine_active_edges()
+            self.spread_influence()
+            
+            current_attempted_influence = len(self.attempted_influence)
+            current_attempted_deinfluence = len(self.attempted_deinfluence)
+            
+            # Check if new attempts can be made
+            if (current_attempted_influence == previous_attempted_influence and
+                current_attempted_deinfluence == previous_attempted_deinfluence):
+                break
 
     def run_cascade_influencer(self, steps):
         #self.pre_determine_active_edges()
@@ -236,6 +251,44 @@ class InfluenceDeinfluenceModel:
         """Select k random deinfluencers."""
         population = sorted(self.graph.nodes)
         return random.sample(population, k)
+    
+    def greedy_hill_climbing_deinf(self, j, steps, R=10):
+        """Select j de-influencers using greedy algorithm."""
+        optimized_deinfluencer = set()
+        self.reset_graph()
+
+        for _ in range(j):
+            best_candidate = None
+            best_score = -1
+
+            for node in self.graph.nodes:
+                if node in optimized_deinfluencer:
+                    continue
+                
+                # Temporarily add the candidate node to the set of influencers
+                current_deinfluencers = optimized_deinfluencer | {node}
+                total_score = 0
+
+                for _ in range(R):
+                    self.activated_edges.clear()  # Reset activated edges
+                    self.set_initial_states()
+                    self.set_influencers(current_deinfluencers)
+                    self.run_cascade_influencer(steps)
+                    total_score += self.evaluate_influence()
+
+                avg_score = total_score / R
+
+                if avg_score > best_score:
+                    best_score = avg_score
+                    best_candidate = node
+
+            if best_candidate is not None:
+                optimized_deinfluencer.add(best_candidate)
+            self.reset_graph()
+
+        return optimized_deinfluencer
+    
+    
     
     def greedy_hill_climbing_deinf(self, j, steps, R=10):
         """Select j de-influencers using greedy algorithm."""
