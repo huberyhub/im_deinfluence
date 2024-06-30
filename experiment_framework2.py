@@ -1,6 +1,8 @@
 import fast_model_improved as fmi
 from pyexpat import model
+import networkx as nx
 import copy
+import random
 
 def choose_influencers(model, num_influencers, method='random'):
     if method == 'random':
@@ -48,24 +50,11 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
 
-def shuffle_deinfluencers(model, k, deinfluencers_dict):
+def shuffle_deinfluencers(deinfluencers_dict):
     methods_to_shuffle = ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf']
     for method in methods_to_shuffle:
         if method in deinfluencers_dict:
-            if method == 'Random':
-                deinfluencers_dict[method] = model.select_deinfluencers_random(k)
-            elif method == 'RanExIniInf':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_not_ini_influencers(k)
-            elif method == 'RanExAllInf':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_not_influencers(k)
-            elif method == 'RIniInf':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_ini_influencers(k)
-            elif method == 'RInfl':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_influencers(k)
-            elif method == 'RRankedIniInf':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
-            elif method == 'RRankedInf':
-                deinfluencers_dict[method] = model.select_deinfluencers_from_influencers_degree_centrality(k)
+            random.shuffle(deinfluencers_dict[method])
     return deinfluencers_dict
 
 # Define the combined count function
@@ -99,7 +88,7 @@ def average_results(deinfluencers_list, model, num_runs, steps):
             cumulative_results[k] = {method: (0, 0, {'I->S': 0, 'D->S': 0, 'D->I': 0}) for method in deinfluencers_methods.keys()}
         
         for _ in range(num_runs):
-            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
+            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(deinfluencers) if method in ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
             results = {
                 method: count_deinfluenced(model, deinfluencers, num_runs, steps)
                 for method, deinfluencers in shuffled_deinfluencers_methods.items()
