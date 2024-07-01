@@ -49,13 +49,13 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
 
-def select_deinfluencers_budget(budget_ls, model):
+def select_deinfluencers_budget(budget_ls, model, type):
     deinfluencers_list = []
     for budget in budget_ls:
         deinfluencers_dict = {}
         # Sample function calls to model object methods
-        deinfluencers_dict['Random'] = choose_random_nodes_until_budget(model.graph,budget)
-        deinfluencers_dict['Degree'] = choose_highest_degree_nodes_until_budget(model.graph,budget)
+        deinfluencers_dict['Random'] = choose_random_nodes_until_budget(model.graph,budget,type)
+        deinfluencers_dict['Degree'] = choose_highest_degree_nodes_until_budget(model.graph,budget,type)
 
         deinfluencers_list.append((budget, deinfluencers_dict))
     return deinfluencers_list
@@ -210,13 +210,13 @@ def average_results_without_shuffle(deinfluencers_list, model, num_runs, steps):
     return average_results
 
 
-def choose_highest_degree_nodes_until_budget(graph, budget):
+def choose_highest_degree_nodes_until_budget(graph, budget, type):
     selected_nodes = set()
     sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=True)
     current_budget = 0
     
     for node in sorted_nodes:
-        node_budget = graph.nodes[node]['budget']
+        node_budget = graph.nodes[node][type]
         if current_budget + node_budget > budget:
             break
         selected_nodes.add(node)
@@ -224,14 +224,14 @@ def choose_highest_degree_nodes_until_budget(graph, budget):
     
     return selected_nodes
 
-def choose_random_nodes_until_budget(graph, budget):
+def choose_random_nodes_until_budget(graph, budget, type):
     selected_nodes = set()
     nodes = list(graph.nodes)
     random.shuffle(nodes)
     current_budget = 0
     
     for node in nodes:
-        node_budget = graph.nodes[node]['budget']
+        node_budget = graph.nodes[node][type]
         if current_budget + node_budget > budget:
             break
         selected_nodes.add(node)

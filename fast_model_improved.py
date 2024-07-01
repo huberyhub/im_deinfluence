@@ -15,7 +15,8 @@ class InfluenceDeinfluenceModel:
         self.p = p
         self.attempted_influence = set()  # Track edges that have attempted influence
         self.attempted_deinfluence = set()  # Track edges that have attempted deinfluence
-        self.assign_node_budgets()  # Assign budgets to nodes based on degree
+        self.assign_node_budgets_linear()  # Assign budgets to nodes based on degree
+        self.assign_node_budgets_sqrt()
 
     def edge_weights(self, type, c):
         if type == 'random':
@@ -31,11 +32,18 @@ class InfluenceDeinfluenceModel:
     def reset_transition_counts(self):
         self.transition_counts = {'I->S': 0, 'D->S': 0, 'D->I': 0}
 
-    def assign_node_budgets(self):
+    def assign_node_budgets_sqrt(self):
         for node in self.graph.nodes:
             degree = self.graph.degree(node)
             budget = math.sqrt(degree)
-            self.graph.nodes[node]['budget'] = budget
+            self.graph.nodes[node]['budget_sqrt'] = budget
+    
+    def assign_node_budgets_linear(self):
+        for node in self.graph.nodes:
+            degree = self.graph.degree(node)
+            budget = degree
+            self.graph.nodes[node]['budget_linear'] = budget
+
 
     def random_edge_weights(self):
         for u, v in self.graph.edges:
