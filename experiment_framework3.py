@@ -1,7 +1,6 @@
 import fast_model_improved as fmi
 from pyexpat import model
 import copy
-import random
 
 def choose_influencers(model, num_influencers, method='random'):
     if method == 'random':
@@ -49,17 +48,6 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
 
-def select_deinfluencers_budget(budget_ls, model):
-    deinfluencers_list = []
-    for budget in budget_ls:
-        deinfluencers_dict = {}
-        # Sample function calls to model object methods
-        deinfluencers_dict['Random'] = choose_random_nodes_until_budget(model.graph,budget)
-        deinfluencers_dict['Degree'] = choose_highest_degree_nodes_until_budget(model.graph,budget)
-
-        deinfluencers_list.append((budget, deinfluencers_dict))
-    return deinfluencers_list
-
 def shuffle_deinfluencers(model, k, deinfluencers_dict):
     methods_to_shuffle = ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf']
     for method in methods_to_shuffle:
@@ -104,7 +92,6 @@ def count_deinfluenced(model, deinfluencers, num_runs, steps):
     return total_deinfluenced / num_runs, total_influenced / num_runs, {key: total / num_runs for key, total in total_transition_counts.items()}
 
 def average_results(deinfluencers_list, model, num_runs, steps):
-
     cumulative_results = {}
 
     for k, deinfluencers_methods in deinfluencers_list:
@@ -116,42 +103,6 @@ def average_results(deinfluencers_list, model, num_runs, steps):
             results = {
                 method: count_deinfluenced(model, deinfluencers, num_runs, steps)
                 for method, deinfluencers in shuffled_deinfluencers_methods.items()
-            }
-            
-            for method, result in results.items():
-                cumulative_results[k][method] = (
-                    cumulative_results[k][method][0] + result[0],
-                    cumulative_results[k][method][1] + result[1],
-                    {key: cumulative_results[k][method][2][key] + result[2][key] for key in result[2]}
-                )
-    
-    average_results = {
-        k: {
-            method: (
-                cumulative_results[k][method][0] / num_runs,
-                cumulative_results[k][method][1] / num_runs,
-                {key: cumulative_results[k][method][2][key] / num_runs for key in cumulative_results[k][method][2]}
-            )
-            for method in cumulative_results[k]
-        }
-        for k in cumulative_results
-    }
-    
-    return average_results
-
-
-def average_results_simple(deinfluencers_list, model, num_runs, steps):
-    
-    cumulative_results = {}
-
-    for k, deinfluencers_methods in deinfluencers_list:
-        if k not in cumulative_results:
-            cumulative_results[k] = {method: (0, 0, {'I->S': 0, 'D->S': 0, 'D->I': 0}) for method in deinfluencers_methods.keys()}
-        
-        for _ in range(num_runs):
-            results = {
-                method: count_deinfluenced(model, deinfluencers, num_runs, steps)
-                for method, deinfluencers in deinfluencers_methods.items()
             }
             
             for method, result in results.items():
@@ -191,7 +142,7 @@ def average_results_without_shuffle(deinfluencers_list, model, num_runs, steps):
             for method, result in results.items():
                 cumulative_results[k][method] = (
                     cumulative_results[k][method][0] + result[0],
-                    cumulative_results[k][method][1] + result[1],
+                    cumulative_results[k] [method][1] + result[1],
                     {key: cumulative_results[k][method][2][key] + result[2][key] for key in result[2]}
                 )
     
@@ -208,33 +159,3 @@ def average_results_without_shuffle(deinfluencers_list, model, num_runs, steps):
     }
     
     return average_results
-
-
-def choose_highest_degree_nodes_until_budget(graph, budget):
-    selected_nodes = set()
-    sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=True)
-    current_budget = 0
-    
-    for node in sorted_nodes:
-        node_budget = graph.nodes[node]['budget']
-        if current_budget + node_budget > budget:
-            break
-        selected_nodes.add(node)
-        current_budget += node_budget
-    
-    return selected_nodes
-
-def choose_random_nodes_until_budget(graph, budget):
-    selected_nodes = set()
-    nodes = list(graph.nodes)
-    random.shuffle(nodes)
-    current_budget = 0
-    
-    for node in nodes:
-        node_budget = graph.nodes[node]['budget']
-        if current_budget + node_budget > budget:
-            break
-        selected_nodes.add(node)
-        current_budget += node_budget
-    
-    return selected_nodes
