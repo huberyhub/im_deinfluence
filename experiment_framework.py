@@ -210,7 +210,7 @@ def average_results_without_shuffle(deinfluencers_list, model, num_runs, steps):
     return average_results
 
 
-def choose_highest_degree_nodes_until_budget(graph, budget, type):
+def choose_highest_degree_nodes_until_budget_naive(graph, budget, type):
     selected_nodes = set()
     sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=True)
     current_budget = 0
@@ -224,7 +224,7 @@ def choose_highest_degree_nodes_until_budget(graph, budget, type):
     
     return selected_nodes
 
-def choose_random_nodes_until_budget(graph, budget, type):
+def choose_random_nodes_until_budget_naive(graph, budget, type):
     selected_nodes = set()
     nodes = list(graph.nodes)
     random.shuffle(nodes)
@@ -236,5 +236,55 @@ def choose_random_nodes_until_budget(graph, budget, type):
             break
         selected_nodes.add(node)
         current_budget += node_budget
+    
+    return selected_nodes
+
+
+def choose_highest_degree_nodes_until_budget(graph, budget, type):
+    selected_nodes = set()
+    sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=True)
+    current_budget = 0
+    
+    for node in sorted_nodes:
+        node_budget = graph.nodes[node][type]
+        if current_budget + node_budget <= budget:
+            selected_nodes.add(node)
+            current_budget += node_budget
+    
+    # Check if there is remaining budget
+    if current_budget < budget:
+        for node in sorted_nodes:
+            if node not in selected_nodes:
+                node_budget = graph.nodes[node][type]
+                if current_budget + node_budget <= budget:
+                    selected_nodes.add(node)
+                    current_budget += node_budget
+                if current_budget == budget:
+                    break
+    
+    return selected_nodes
+
+def choose_random_nodes_until_budget(graph, budget, type):
+    selected_nodes = set()
+    nodes = list(graph.nodes)
+    random.shuffle(nodes)
+    current_budget = 0
+    
+    for node in nodes:
+        node_budget = graph.nodes[node][type]
+        if current_budget + node_budget <= budget:
+            selected_nodes.add(node)
+            current_budget += node_budget
+    
+    # Check if there is remaining budget
+    if current_budget < budget:
+        for node in nodes:
+            if node not in selected_nodes:
+                node_budget = graph.nodes[node][type]
+                if current_budget + node_budget <= budget:
+                    selected_nodes.add(node)
+                    current_budget += node_budget
+                if current_budget == budget:
+                    break
     
     return selected_nodes
