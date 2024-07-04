@@ -43,8 +43,8 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_dict['PageRank'] = model.select_deinfluencers_pagerank_centrality(k)
         deinfluencers_dict['RIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
         deinfluencers_dict['RInfl'] = model.select_deinfluencers_from_influencers(k)
-        deinfluencers_dict['RankedIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
-        deinfluencers_dict['RankedInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
+        deinfluencers_dict['RRankedIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
+        deinfluencers_dict['RRankedInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
         
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
@@ -55,26 +55,13 @@ def select_deinfluencers_budget(budget_ls, model, type):
         deinfluencers_dict = {}
         # Sample function calls to model object methods
         deinfluencers_dict['Random'] = choose_random_nodes_until_budget(model.graph,budget,type)
-        deinfluencers_dict['High Degree'] = choose_highest_degree_nodes_until_budget(model.graph,budget,type)
-        deinfluencers_dict['Low Degree'] = choose_lowest_degree_nodes_until_budget(model.graph,budget,type)
-
-        deinfluencers_list.append((budget, deinfluencers_dict))
-    return deinfluencers_list
-
-def select_deinfluencers_budget_naive(budget_ls, model, type):
-    deinfluencers_list = []
-    for budget in budget_ls:
-        deinfluencers_dict = {}
-        # Sample function calls to model object methods
-        deinfluencers_dict['Random'] = choose_random_nodes_until_budget_naive(model.graph,budget,type)
-        deinfluencers_dict['High Degree'] = choose_highest_degree_nodes_until_budget_naive(model.graph,budget,type)
-        deinfluencers_dict['Low Degree'] = choose_lowest_degree_nodes_until_budget_naive(model.graph,budget,type)
+        deinfluencers_dict['Degree'] = choose_highest_degree_nodes_until_budget(model.graph,budget,type)
 
         deinfluencers_list.append((budget, deinfluencers_dict))
     return deinfluencers_list
 
 def shuffle_deinfluencers(model, k, deinfluencers_dict):
-    methods_to_shuffle = ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RankedIniInf', 'RankedInf']
+    methods_to_shuffle = ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf']
     for method in methods_to_shuffle:
         if method in deinfluencers_dict:
             if method == 'Random':
@@ -87,9 +74,9 @@ def shuffle_deinfluencers(model, k, deinfluencers_dict):
                 deinfluencers_dict[method] = model.select_deinfluencers_from_ini_influencers(k)
             elif method == 'RInfl':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_influencers(k)
-            elif method == 'RankedIniInf':
+            elif method == 'RRankedIniInf':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
-            elif method == 'RankedInf':
+            elif method == 'RRankedInf':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_influencers_degree_centrality(k)
     return deinfluencers_dict
 
@@ -125,7 +112,7 @@ def average_results(deinfluencers_list, model, num_runs, steps):
             cumulative_results[k] = {method: (0, 0, {'I->S': 0, 'D->S': 0, 'D->I': 0}) for method in deinfluencers_methods.keys()}
         
         for _ in range(num_runs):
-            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RankedIniInf', 'RankedInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
+            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random', 'RanExIniInf', 'RanExAllInf', 'RIniInf', 'RInfl', 'RRankedIniInf', 'RRankedInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
             results = {
                 method: count_deinfluenced(model, deinfluencers, num_runs, steps)
                 for method, deinfluencers in shuffled_deinfluencers_methods.items()
@@ -253,21 +240,6 @@ def choose_random_nodes_until_budget_naive(graph, budget, type):
     return selected_nodes
 
 
-def choose_lowest_degree_nodes_until_budget_naive(graph, budget, type):
-    selected_nodes = set()
-    sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=False)
-    current_budget = 0
-    
-    for node in sorted_nodes:
-        node_budget = graph.nodes[node][type]
-        if current_budget + node_budget > budget:
-            break
-        selected_nodes.add(node)
-        current_budget += node_budget
-    
-    return selected_nodes
-
-
 def choose_highest_degree_nodes_until_budget(graph, budget, type):
     selected_nodes = set()
     sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node), reverse=True)
@@ -307,30 +279,6 @@ def choose_random_nodes_until_budget(graph, budget, type):
     # Check if there is remaining budget
     if current_budget < budget:
         for node in nodes:
-            if node not in selected_nodes:
-                node_budget = graph.nodes[node][type]
-                if current_budget + node_budget <= budget:
-                    selected_nodes.add(node)
-                    current_budget += node_budget
-                if current_budget == budget:
-                    break
-    
-    return selected_nodes
-
-def choose_lowest_degree_nodes_until_budget(graph, budget, type):
-    selected_nodes = set()
-    sorted_nodes = sorted(graph.nodes, key=lambda node: graph.degree(node))
-    current_budget = 0
-    
-    for node in sorted_nodes:
-        node_budget = graph.nodes[node][type]
-        if current_budget + node_budget <= budget:
-            selected_nodes.add(node)
-            current_budget += node_budget
-    
-    # Check if there is remaining budget
-    if current_budget < budget:
-        for node in sorted_nodes:
             if node not in selected_nodes:
                 node_budget = graph.nodes[node][type]
                 if current_budget + node_budget <= budget:
