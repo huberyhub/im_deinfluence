@@ -35,17 +35,17 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         # Sample function calls to model object methods
         deinfluencers_dict['Random'] = model.select_deinfluencers_random(k)
         deinfluencers_dict['RdExIniInf'] = model.select_deinfluencers_from_not_ini_influencers(k)
-        deinfluencers_dict['RanExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
+        deinfluencers_dict['RdExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
+        deinfluencers_dict['RdIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
+        deinfluencers_dict['RdAllInf'] = model.select_deinfluencers_from_influencers(k)
+        deinfluencers_dict['RkIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
+        deinfluencers_dict['RkAllInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
         deinfluencers_dict['Degree'] = model.select_deinfluencers_degree_centrality(k)
         deinfluencers_dict['Closeness'] = model.select_deinfluencers_closeness_centrality(k)
         deinfluencers_dict['Betweenness'] = model.select_deinfluencers_betweenness_centrality(k)
         deinfluencers_dict['Eigenvector'] = model.select_deinfluencers_eigenvector_centrality(k, max_iter=1000, tol=1e-06)
         deinfluencers_dict['PageRank'] = model.select_deinfluencers_pagerank_centrality(k)
-        deinfluencers_dict['RdIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
-        deinfluencers_dict['RdAllInf'] = model.select_deinfluencers_from_influencers(k)
-        deinfluencers_dict['RkIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
-        deinfluencers_dict['RkAllInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
-        
+    
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
 
@@ -74,14 +74,14 @@ def select_deinfluencers_budget_naive(budget_ls, model, type):
     return deinfluencers_list
 
 def shuffle_deinfluencers(model, k, deinfluencers_dict):
-    methods_to_shuffle = ['Random', 'RdExIniInf', 'RanExAllInf', 'RdIniInf', 'RdAllInf', 'RkIniInf', 'RkAllInf']
+    methods_to_shuffle = ['Random', 'RdExIniInf', 'RdExAllInf', 'RdIniInf', 'RdAllInf', 'RkIniInf', 'RkAllInf']
     for method in methods_to_shuffle:
         if method in deinfluencers_dict:
             if method == 'Random':
                 deinfluencers_dict[method] = model.select_deinfluencers_random(k)
             elif method == 'RdExIniInf':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_not_ini_influencers(k)
-            elif method == 'RanExAllInf':
+            elif method == 'RdExAllInf':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_not_influencers(k)
             elif method == 'RdIniInf':
                 deinfluencers_dict[method] = model.select_deinfluencers_from_ini_influencers(k)
@@ -126,7 +126,7 @@ def average_results(deinfluencers_list, model, num_runs, steps):
             cumulative_results[k] = {method: (0, 0, {'I->S': 0, 'D->S': 0, 'D->I': 0}) for method in deinfluencers_methods.keys()}
         
         for _ in range(num_runs):
-            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random', 'RdExIniInf', 'RanExAllInf', 'RdIniInf', 'RdAllInf', 'RkIniInf', 'RkAllInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
+            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random', 'RdExIniInf', 'RdExAllInf', 'RdIniInf', 'RdAllInf', 'RkIniInf', 'RkAllInf'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
             results = {
                 method: count_deinfluenced(model, deinfluencers, num_runs, steps)
                 for method, deinfluencers in shuffled_deinfluencers_methods.items()

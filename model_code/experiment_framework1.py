@@ -35,7 +35,7 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         # Sample function calls to model object methods
         deinfluencers_dict['Random'] = model.select_deinfluencers_random(k)
         deinfluencers_dict['RdExIniInf'] = model.select_deinfluencers_from_not_ini_influencers(k)
-        deinfluencers_dict['RanExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
+        deinfluencers_dict['RdExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
         deinfluencers_dict['Degree'] = model.select_deinfluencers_degree_centrality(k)
         deinfluencers_dict['Closeness'] = model.select_deinfluencers_closeness_centrality(k)
         deinfluencers_dict['Betweenness'] = model.select_deinfluencers_betweenness_centrality(k)
