@@ -3,6 +3,7 @@ import networkx as nx
 import random
 import math
 import copy
+
 class InfluenceDeinfluenceModel:
     def __init__(self, graph, edge_weights_type='random', c=1, p=0.5):
         self.graph = graph
