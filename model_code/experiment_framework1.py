@@ -34,17 +34,17 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_dict = {}
         # Sample function calls to model object methods
         deinfluencers_dict['Random'] = model.select_deinfluencers_random(k)
-        deinfluencers_dict['RanExIniInf'] = model.select_deinfluencers_from_not_ini_influencers(k)
+        deinfluencers_dict['RdExIniInf'] = model.select_deinfluencers_from_not_ini_influencers(k)
         deinfluencers_dict['RanExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
         deinfluencers_dict['Degree'] = model.select_deinfluencers_degree_centrality(k)
         deinfluencers_dict['Closeness'] = model.select_deinfluencers_closeness_centrality(k)
         deinfluencers_dict['Betweenness'] = model.select_deinfluencers_betweenness_centrality(k)
         deinfluencers_dict['Eigenvector'] = model.select_deinfluencers_eigenvector_centrality(k, max_iter=1000, tol=1e-06)
         deinfluencers_dict['PageRank'] = model.select_deinfluencers_pagerank_centrality(k)
-        deinfluencers_dict['RIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
-        deinfluencers_dict['RInfl'] = model.select_deinfluencers_from_influencers(k)
-        deinfluencers_dict['RRankedIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
-        deinfluencers_dict['RRankedInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
+        deinfluencers_dict['RdIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
+        deinfluencers_dict['RdAllInf'] = model.select_deinfluencers_from_influencers(k)
+        deinfluencers_dict['RRkIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
+        deinfluencers_dict['RRkAllInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
         
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
