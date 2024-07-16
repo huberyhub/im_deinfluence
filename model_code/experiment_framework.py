@@ -165,9 +165,10 @@ def average_results_simple(deinfluencers_list, model, num_runs, steps):
             cumulative_results[k] = {method: (0, 0, {'I->S': 0, 'D->S': 0, 'D->I': 0}) for method in deinfluencers_methods.keys()}
         
         for _ in range(num_runs):
+            shuffled_deinfluencers_methods = {method: shuffle_deinfluencers(model, k, deinfluencers) if method in ['Random','High Degree', 'Low Degree'] else deinfluencers for method, deinfluencers in deinfluencers_methods.items()}
             results = {
                 method: count_deinfluenced(model, deinfluencers, num_runs, steps)
-                for method, deinfluencers in deinfluencers_methods.items()
+                for method, deinfluencers in shuffled_deinfluencers_methods.items()
             }
             
             for method, result in results.items():
