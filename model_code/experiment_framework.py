@@ -25,6 +25,33 @@ def run_influence_cascade(graph, num_influencers, steps, selection_method='rando
     # Return the updated graph and model
     return model
 
+
+def run_cascade_with_recording(model, num_deinfluencers, steps):
+  
+    deinfluencers = model.select_deinfluencers_random(num_deinfluencers)
+    model.set_deinfluencers(deinfluencers)
+
+    # Evaluate the influence and deinfluence
+    num_influenced = model.evaluate_influence()
+    num_deinfluenced = model.evaluate_deinfluence()
+    num_susceptible = model.evaluate_susceptible()
+    
+    # Record the numbers of influencers, deinfluencers, and susceptibles at each step
+    influencer_counts = [num_influenced]
+    deinfluencer_counts = [num_deinfluenced]
+    susceptible_counts = [num_susceptible]
+
+    for step in range(steps):
+        model.pre_determine_active_edges()
+        model.spread_influence()
+        
+        influencer_counts.append(model.evaluate_influence())
+        deinfluencer_counts.append(model.evaluate_deinfluence())
+        susceptible_counts.append(model.evaluate_susceptible())
+
+    return influencer_counts, deinfluencer_counts, susceptible_counts
+
+
 def run_simple_cascade(steps):
     model.set_influencers(model.selected_influencers)
     model.run_cascade(steps)
@@ -625,4 +652,34 @@ def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges,
     axs[2].set_ylabel('Average Number of Final Susceptible Nodes')
 
     plt.tight_layout()
+    plt.show()
+
+
+def plot_cascade_results_set(influencer_counts, deinfluencer_counts, susceptible_counts):
+    steps = range(len(influencer_counts))
+    plt.figure(figsize=(10, 6))
+    plt.plot(steps, influencer_counts, label='Influencers', marker='o')
+    plt.plot(steps, deinfluencer_counts, label='Deinfluencers', marker='s')
+    plt.plot(steps, susceptible_counts, label='Susceptibles', marker='^')
+    plt.xticks(range(len(steps)), [int(step) for step in steps])  # Show integer steps on x-axis
+    plt.xlabel('Steps')
+    plt.ylabel('Count')
+    plt.title('General Cascade Dynamics Over Time')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim(0, 2000)  # Set y-axis range to 2000
+    plt.show()
+
+def plot_cascade_results(influencer_counts, deinfluencer_counts, susceptible_counts):
+    steps = range(len(influencer_counts))
+    plt.figure(figsize=(10, 6))
+    plt.plot(steps, influencer_counts, label='Influencers', marker='o')
+    plt.plot(steps, deinfluencer_counts, label='Deinfluencers', marker='s')
+    plt.plot(steps, susceptible_counts, label='Susceptibles', marker='^')
+    plt.xticks(range(len(steps)), [int(step) for step in steps])  # Show integer steps on x-axis
+    plt.xlabel('Steps')
+    plt.ylabel('Count')
+    plt.title('General Cascade Dynamics Over Time')
+    plt.legend()
+    plt.grid(True)
     plt.show()
