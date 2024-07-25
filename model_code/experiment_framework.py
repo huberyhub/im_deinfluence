@@ -383,12 +383,12 @@ def plot_deinfluencer_results_exp2(results, G):
     - G: The graph object containing the nodes.
     """
     # Plotting results
-    fig, axs = plt.subplots(3, figsize=(15, 15))
+    fig, axs = plt.subplots(3, figsize=(12,12))
     
     # Set titles for individual subplots
-    axs[0].set_title('Effectiveness of Deinfluencers by Selection Method and Budget')
-    axs[1].set_title('Influence Reduction by Deinfluencer Selection Method and Budget')
-    axs[2].set_title('Remaining Susceptible Nodes by Deinfluencer Selection Method and Budget')
+    axs[0].set_title('Effectiveness of Deinfluencers')
+    axs[1].set_title('Influence Reduction')
+    axs[2].set_title('Remaining Susceptible Nodes')
 
     # Create line plots
     methods = results[next(iter(results))].keys()  # Get all methods from the first key
@@ -405,15 +405,12 @@ def plot_deinfluencer_results_exp2(results, G):
         axs[2].plot(k_values, susceptible_nodes, label=method, marker="o")
 
     axs[0].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    axs[0].set_xlabel('Number of Deinfluencers')
-    axs[0].set_ylabel('Average Number of Final Deinfluenced Nodes')
+    axs[0].set_ylabel('Average Number of Final Deinfluencer')
 
     axs[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    axs[1].set_xlabel('Number of Deinfluencers')
-    axs[1].set_ylabel('Average Number of Final Influenced Nodes')
+    axs[1].set_ylabel('Average Number of Final Influencer')
 
     axs[2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    axs[2].set_xlabel('Number of Deinfluencers')
     axs[2].set_ylabel('Average Number of Final Susceptible Nodes')
 
     plt.tight_layout()
