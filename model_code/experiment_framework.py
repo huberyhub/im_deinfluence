@@ -78,6 +78,46 @@ def select_deinfluencers(k_deinfluencers_ls, model):
         deinfluencers_list.append((k, deinfluencers_dict))
     return deinfluencers_list
 
+def select_deinfluencers_subset(k_deinfluencers_ls, model):
+    deinfluencers_list = []
+    for k in k_deinfluencers_ls:
+        deinfluencers_dict = {}
+        # Sample function calls to model object methods
+        deinfluencers_dict['Degree'] = model.select_deinfluencers_degree_centrality(k)
+        deinfluencers_dict['Closeness'] = model.select_deinfluencers_closeness_centrality(k)
+        deinfluencers_dict['Betweenness'] = model.select_deinfluencers_betweenness_centrality(k)
+        deinfluencers_dict['Eigenvector'] = model.select_deinfluencers_eigenvector_centrality(k, max_iter=1000, tol=1e-06)
+        deinfluencers_dict['PageRank'] = model.select_deinfluencers_pagerank_centrality(k)
+    
+        deinfluencers_list.append((k, deinfluencers_dict))
+    return deinfluencers_list
+
+def select_deinfluencers_1(k_deinfluencers_ls, model):
+    deinfluencers_list = []
+    for k in k_deinfluencers_ls:
+        deinfluencers_dict = {}
+        # Sample function calls to model object methods
+        deinfluencers_dict['Random'] = model.select_deinfluencers_random(k)
+        deinfluencers_dict['RdExIniInf'] = model.select_deinfluencers_from_not_ini_influencers(k)
+        deinfluencers_dict['RdExAllInf'] = model.select_deinfluencers_from_not_influencers(k)
+        deinfluencers_dict['RdIniInf'] = model.select_deinfluencers_from_ini_influencers(k)
+        deinfluencers_dict['RdAllInf'] = model.select_deinfluencers_from_influencers(k)
+    
+        deinfluencers_list.append((k, deinfluencers_dict))
+    return deinfluencers_list
+
+def select_deinfluencers_2(k_deinfluencers_ls, model):
+    deinfluencers_list = []
+    for k in k_deinfluencers_ls:
+        deinfluencers_dict = {}
+        # Sample function calls to model object methods
+        deinfluencers_dict['RkIniInf'] = model.select_deinfluencers_from_ini_influencers_degree_centrality(k)
+        deinfluencers_dict['RkAllInf'] = model.select_deinfluencers_from_influencers_degree_centrality(k)
+        deinfluencers_dict['Degree'] = model.select_deinfluencers_degree_centrality(k)
+    
+        deinfluencers_list.append((k, deinfluencers_dict))
+    return deinfluencers_list
+
 def select_deinfluencers_budget(budget_ls, model, type):
     deinfluencers_list = []
     for budget in budget_ls:
