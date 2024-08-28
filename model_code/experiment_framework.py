@@ -459,6 +459,8 @@ def plot_deinfluencer_results_exp2(results, G):
 
 import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+
 def plot_deinfluencer_results_exp1(results, G, graph_type, num_nodes, num_edges, num_influencers, influencers_cascade_steps, general_cascade_steps, num_avg_runs):
     """
     Plot the effectiveness of deinfluencers by selection method and budget, with an info box.
@@ -475,7 +477,7 @@ def plot_deinfluencer_results_exp1(results, G, graph_type, num_nodes, num_edges,
     - general_cascade_steps: Number of general cascade steps.
     - num_avg_runs: Number of average runs.
     """
-    # Define different marker styles for each method
+    # Define different marker styles and colors for each method
     marker_styles = {
         'Random': 'o',
         'RdExIniInf': 's',
@@ -489,6 +491,21 @@ def plot_deinfluencer_results_exp1(results, G, graph_type, num_nodes, num_edges,
         'Betweenness': '<',
         'Eigenvector': '>',
         'PageRank': 'P'
+    }
+
+    color_styles = {
+        'Random': 'tab:blue',
+        'RdExIniInf': 'tab:orange',
+        'RdExAllInf': 'tab:green',
+        'RdIniInf': 'tab:red',
+        'RdAllInf': 'tab:brown',
+        'RkIniInf': 'tab:purple',
+        'RkAllInf': 'tab:pink',
+        'Degree': 'tab:gray',
+        'Closeness': 'tab:olive',
+        'Betweenness': 'tab:cyan',
+        'Eigenvector': 'tab:blue',
+        'PageRank': 'tab:orange'
     }
 
     # Create subplots, including an additional one for the info box
@@ -527,10 +544,11 @@ def plot_deinfluencer_results_exp1(results, G, graph_type, num_nodes, num_edges,
         susceptible_nodes = [total_nodes - (influenced + deinfluenced) for influenced, deinfluenced in zip(influenced_nodes, deinfluenced_nodes)]
 
         marker = marker_styles.get(method, 'o')  # Default to 'o' if method is not in marker_styles
+        color = color_styles.get(method, 'tab:blue')  # Default to 'tab:blue' if method is not in color_styles
 
-        axs[0].plot(k_values, deinfluenced_nodes, label=method, marker=marker)
-        axs[1].plot(k_values, influenced_nodes, label=method, marker=marker)
-        axs[2].plot(k_values, susceptible_nodes, label=method, marker=marker)
+        axs[0].plot(k_values, deinfluenced_nodes, label=method, marker=marker, color=color)
+        axs[1].plot(k_values, influenced_nodes, label=method, marker=marker, color=color)
+        axs[2].plot(k_values, susceptible_nodes, label=method, marker=marker, color=color)
 
     axs[0].legend(loc='center left', bbox_to_anchor=(1, 0.5))
     axs[0].set_xlabel('Number of Deinfluencers')
@@ -599,6 +617,8 @@ def plot_deinfluencer_results_exp3(results, G):
     plt.tight_layout()
     plt.show()
 
+import matplotlib.pyplot as plt
+
 def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges, num_influencers, influencers_cascade_steps, general_cascade_steps, num_avg_runs):
     """
     Plot the effectiveness of deinfluencers by selection method and budget, with an info box.
@@ -615,7 +635,7 @@ def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges,
     - general_cascade_steps: Number of general cascade steps.
     - num_avg_runs: Number of average runs.
     """
-    # Define different marker styles for each method
+    # Define different marker styles and colors for each method
     marker_styles = {
         'Random': 'o',
         'RdExIniInf': 's',
@@ -629,6 +649,21 @@ def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges,
         'Betweenness': '<',
         'Eigenvector': '>',
         'PageRank': 'P'
+    }
+
+    color_styles = {
+        'Random': 'tab:blue',
+        'RdExIniInf': 'tab:orange',
+        'RdExAllInf': 'tab:green',
+        'RdIniInf': 'tab:red',
+        'RdAllInf': 'tab:brown',
+        'RkIniInf': 'tab:purple',
+        'RkAllInf': 'tab:pink',
+        'Degree': 'tab:gray',
+        'Closeness': 'tab:olive',
+        'Betweenness': 'tab:cyan',
+        'Eigenvector': 'tab:blue',
+        'PageRank': 'tab:orange'
     }
 
     # Create subplots, including an additional one for the info box
@@ -667,10 +702,11 @@ def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges,
         susceptible_nodes = [total_nodes - (influenced + deinfluenced) for influenced, deinfluenced in zip(influenced_nodes, deinfluenced_nodes)]
 
         marker = marker_styles.get(method, 'o')  # Default to 'o' if method is not in marker_styles
+        color = color_styles.get(method, 'tab:blue')  # Default to 'tab:blue' if method is not in color_styles
 
-        axs[0].plot(k_values, deinfluenced_nodes, label=method, marker=marker)
-        axs[1].plot(k_values, influenced_nodes, label=method, marker=marker)
-        axs[2].plot(k_values, susceptible_nodes, label=method, marker=marker)
+        axs[0].plot(k_values, deinfluenced_nodes, label=method, marker=marker, color=color)
+        axs[1].plot(k_values, influenced_nodes, label=method, marker=marker, color=color)
+        axs[2].plot(k_values, susceptible_nodes, label=method, marker=marker, color=color)
 
     # Set y-axis limits
     for ax in axs[:3]:
@@ -690,6 +726,7 @@ def plot_deinfluencer_results_exp3(results, G, graph_type, num_nodes, num_edges,
 
     plt.tight_layout()
     plt.show()
+
 
 
 def plot_cascade_results_set(influencer_counts, deinfluencer_counts, susceptible_counts):
